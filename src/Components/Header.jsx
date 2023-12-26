@@ -1,11 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link,useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate=useNavigate()
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!isMobileMenuOpen);
+  };
+  const closeDropdownOnOutsideClick = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setDropdownOpen(false);
+    }
+  };
+
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!isDropdownOpen);
   };
 
   useEffect(() => {
@@ -23,15 +37,26 @@ const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    document.addEventListener('click', closeDropdownOnOutsideClick);
+
+    return () => {
+      document.removeEventListener('click', closeDropdownOnOutsideClick);
+    };
+  }, []);
+
+  const sendToSignup=()=>{
+    navigate('/SignUpPage')
+  }
+
   return (
     <header
-      className={`text-gray-600 body-font nav bg-white fixed top-0 w-full z-10 backdrop-blur-md bg-opacity-10 ${
-        isSticky ? 'border-b border-blue-300' : ''
-      }`}
+      className={`text-gray-600 body-font nav bg-white fixed top-0 w-full z-10 backdrop-blur-md bg-opacity-10 ${isSticky ? 'border-b border-blue-300' : ''
+        }`}
     >
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="md:hidden ml-auto inline-flex items-center justify-start bg-transparent border-0 p-0 focus:outline-none"
           onClick={toggleMobileMenu}
         >
@@ -69,27 +94,64 @@ const Header = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <nav className="md:hidden mt-4 flex flex-col items-start text-base justify-center w-full">
-            <a className="mb-2 hover:text-gray-900">First Link</a>
-            <a className="mb-2 hover:text-gray-900">Second Link</a>
-            <a className="mb-2 hover:text-gray-900">Third Link</a>
-            <a className="mb-2 hover:text-gray-900">Fourth Link</a>
+            <Link className="mb-2 hover:text-gray-900">Home</Link>
+            <Link to='/about' className="mb-2 hover:text-gray-900">About</Link>
+            <Link to='/contact' className="mb-2 hover:text-gray-900">Contact</Link>
           </nav>
         )}
 
         {/* Desktop Menu */}
         <nav className="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center hidden md:flex">
-          <a className="cursor-pointer mr-5 hover:text-gray-900">First Link</a>
-          <a className="cursor-pointer mr-5 hover:text-gray-900">Second Link</a>
-          <a className="cursor-pointer mr-5 hover:text-gray-900">Third Link</a>
-          <a className="cursor-pointer mr-5 hover:text-gray-900">Fourth Link</a>
+          <Link to='/' className="cursor-pointer mr-5 hover:text-gray-900">Home</Link>
+          <Link to='/about' className="cursor-pointer mr-5 hover:text-gray-900">About</Link>
+          <Link to='/contact' className="cursor-pointer mr-5 hover:text-gray-900">Contact</Link>
         </nav>
 
         {/* Login Button */}
         <button
-          className="bg-blue-500 hidden cursor-pointer md:flex  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline-blue active:bg-blue-800"
-        >
+          className="bg-indigo-900 hidden cursor-pointer md:flex  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline-blue active:bg-blue-800" onClick={sendToSignup}>
           Login
         </button>
+        <div className="relative" ref={dropdownRef}>
+          <button
+            className="  hidden cursor-pointer md:flex   text-white font-bold rounded-full focus:outline-none focus:shadow-outline-blue  "
+            onClick={toggleDropdown}
+          >
+            <img
+              className="w-10 h-10 rounded-full mr-2"
+              src="https://placekitten.com/100/100" // Replace with your avatar image source
+              alt="User Avatar"
+            />
+
+          </button>
+
+          {/* Dropdown Content */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 bg-white border rounded shadow-lg overflow-hidden transition-transform transform scale-100 md:scale-110">
+              <a
+                href="#"
+                className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                onClick={() => {
+                  // Handle dashboard click
+                  setDropdownOpen(false);
+                }}
+              >
+                Dashboard
+              </a>
+              <a
+                href="#"
+                className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                onClick={() => {
+                  // Handle logout click
+                  setDropdownOpen(false);
+                }}
+              >
+                Logout
+              </a>
+            </div>
+          )}
+        </div>
+        
       </div>
     </header>
   );
